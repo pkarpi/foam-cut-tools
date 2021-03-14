@@ -1,10 +1,12 @@
-# Arduino stepper driving program to work with windows foam cutting tools, styroXcut and styroXjog.
+# One more arduino stepper driving program "runsteppers"
 
 ## Getting Started
-You need a windows machine, arduino uno and cnc shield for it.
+This is intended to work with windows foam cutting tools, styroXcut and styroXjog. 
 
 ### Prerequisites
-Connect stepper motors and suitable power input to your cnc-shield. Connect usb cable between windows machine and arduino.
+You need a windows machine, arduino uno and cnc shield for it.
+Connect stepper motors and suitable power input to your cnc-shield. 
+Install arduino windows driver, connect usb cable between windows machine and arduino.
 
 ### Installing
 With arduino ide, send this program to arduino. Load styroXjog from microsoft store and try to connect and run.
