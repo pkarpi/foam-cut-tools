@@ -11,9 +11,19 @@
 # define Z_STP 4 // z -axis stepper control
 # define A_STP 13 // A -axis stepper control
 
-unsigned long previousMicros = 0, currentMicros = 0;
+unsigned long currentMicros = 0;
+unsigned long stepMicros;
+unsigned long microsReceive;
+
 long stepPause = 5000;
-RingBuf<byte, 800> myRingBuffer;
+#define buffer_size 1000
+
+RingBuf<byte, buffer_size> myRingBuffer;
+
+byte byte_array[2];
+byte bitti = 0;
+byte cmd = 0;
+byte xyz, a;
 
 void setup()
 {
@@ -27,7 +37,7 @@ void setup()
   pinMode(A_DIR, OUTPUT);      // sets the digital pin as output
 
   pinMode(EN, OUTPUT);
-  digitalWrite(EN, LOW);
+  digitalWrite(EN, HIGH);
 
   digitalWrite(X_DIR, LOW);
   digitalWrite(Y_DIR, LOW);
@@ -44,10 +54,8 @@ void setup()
 void establishContact()
 {
   Serial.begin(115200);     // opens serial port, sets data rate to 9600 bps
-  //Serial.begin(9600);
-  while (!Serial) {
-    delay(200);
-    ; // wait for serial port to connect. Needed for native USB port only  }
+  while (!Serial)
+  {
   }
 }
 
@@ -56,11 +64,13 @@ void loop()
   currentMicros = micros();
   if (!myRingBuffer.isEmpty())
   {
-    byte bitti = 0;
-
     if (myRingBuffer.pop(bitti))
     {
       portStep(bitti, stepPause - (micros() - currentMicros));
+      if (bitti == 0) // if end, release steppers
+      {
+        digitalWrite(EN, HIGH);
+      }
     }
   }
   else
@@ -71,8 +81,7 @@ void loop()
 
 void portStep(byte askel, int delayLeft)
 {
-  byte xyz, a;
-  unsigned long stepMicros = micros();
+  stepMicros = micros();
 
   //First directions
   bitWrite(xyz, 5, bitRead(askel, 2)); //Stepperi 1
@@ -83,7 +92,7 @@ void portStep(byte askel, int delayLeft)
   PORTD = xyz;
   PORTB = a;
 
-  delayMicroseconds(10);
+  //delayMicroseconds(5);
 
   //Stepperi 1
   // Luetaan X-stepit oikealta tokat, kirjoitetaan PORTD:n ekaan paikkaan
@@ -99,9 +108,10 @@ void portStep(byte askel, int delayLeft)
   PORTD = xyz;
   PORTB = a;
 
-  delayMicroseconds(10);
+  //delayMicroseconds(5);
 
-  // Bitit alas
+
+  //Bitit alas
   bitWrite(xyz, 2, 0);
   bitWrite(xyz, 3, 0);
   bitWrite(xyz, 4, 0);
@@ -114,23 +124,21 @@ void portStep(byte askel, int delayLeft)
   PORTD = xyz;
   PORTB = a;
 
-  //  delayMicroseconds(delay);
+  //delayMicroseconds(5);
+
   receiveBlock(delayLeft - (micros() - stepMicros));
 }
 
-void receiveBlock(unsigned long delay)
+void receiveBlock(int delay)
 {
-  unsigned long microsReceive = micros();
   Serial.write('A');
+  microsReceive = micros();
   while ((micros() - microsReceive) < delay)
   {
     if (Serial.available() > 0)
     {
       if (!myRingBuffer.isFull())
       {
-        byte byte_array[2];
-        byte bitti = 0;
-        byte cmd = 0;
         int rlen = Serial.readBytes(byte_array, 2);
         cmd = byte_array[0];
         bitti = byte_array[1];
@@ -139,9 +147,10 @@ void receiveBlock(unsigned long delay)
         {
           myRingBuffer.push(bitti);
         }
-        else if (cmd == 83) //set speed
+        else if (cmd == 83) //set speed at start
         {
-          stepPause = (long)bitti * 100; //(long)bitti * 100;
+          stepPause = (long)bitti * 100; // convert back to real microseconds value
+          digitalWrite(EN, LOW);
         }
         else if (cmd == 69) // end of file
         {
