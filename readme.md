@@ -2,8 +2,8 @@
 
 ## Getting Started
 This project consist of windows uwp programs **styroXcut and styroXjog** and arduino program
-**runsteppers.ino**. Windows programs are also available in microsoft store if you just want
-to install them.
+**runsteppers.ino**. Windows programs are also available in microsoft store if you want
+to install them without compiling.
 
 ### Prerequisites
 You need a windows machine, **arduino uno** and **cnc shield** for it.
