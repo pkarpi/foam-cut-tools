@@ -11,4 +11,3 @@ Install arduino windows driver, connect usb cable between windows machine and ar
 ### Installing
 With arduino ide, send **runsteppers.ino** to arduino. Load styroXjog from microsoft
 store and connect and run.
-
