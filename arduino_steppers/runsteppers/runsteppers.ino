@@ -110,7 +110,6 @@ void portStep(byte askel, int delayLeft)
 
   //delayMicroseconds(5);
 
-
   //Bitit alas
   bitWrite(xyz, 2, 0);
   bitWrite(xyz, 3, 0);
